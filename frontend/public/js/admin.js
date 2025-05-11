@@ -206,57 +206,58 @@ async function handleEventSubmit(e) {
 }
 
 async function loadEvents() {
-    let events = [];
     try {
-        const eventsData = localStorage.getItem('events');
-        events = eventsData ? JSON.parse(eventsData) : [];
-        if (!Array.isArray(events)) {
-            console.error('Events data is not an array, resetting to empty array');
-            events = [];
-            localStorage.setItem('events', '[]');
-        }
-    } catch (error) {
-        console.error('Error parsing events:', error);
-        events = [];
-        localStorage.setItem('events', '[]');
-    }
-
-    // Events in die jeweiligen Sektionen einfügen
-    for (let i = 1; i <= 4; i++) {
-        const section = document.getElementById(`event${i}`);
-        if (section) {
-            const event = events.find(ev => ev.section === String(i));
-            if (event) {
-                const imgUrl = event.imageUrl && event.imageUrl.trim() !== '' ? event.imageUrl : 'https://i.postimg.cc/L5fgbxQJ/image.png';
-                section.querySelector('.event-image').src = imgUrl;
-                section.querySelector('h2').textContent = event.title || `Event ${i}`;
-                section.querySelector('.event-participation').insertAdjacentHTML('beforebegin', `
-                    <div class="event-details">
-                        <p><strong>Date:</strong> ${formatDate(event.date)}</p>
-                        <p><strong>Time:</strong> ${event.time}</p>
-                        <p><strong>Location:</strong> ${event.location}</p>
-                        <p>${event.description}</p>
-                        ${isAdminLoggedIn ? `<button class=\"edit-image-btn\" data-id=\"${event.id}\">Bild bearbeiten</button>` : ''}
-                    </div>
-                `);
+        const response = await fetch(config.API_BASE_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                action: 'getEvents'
+            })
+        });
+        if (!response.ok) throw new Error('HTTP error!');
+        const data = await response.json();
+        const events = data.events || [];
+        // Events in die jeweiligen Sektionen einfügen
+        for (let i = 1; i <= 4; i++) {
+            const section = document.getElementById(`event${i}`);
+            if (section) {
+                const event = events.find(ev => ev.section === String(i));
+                if (event) {
+                    const imgUrl = event.imageUrl && event.imageUrl.trim() !== '' ? event.imageUrl : 'https://i.postimg.cc/L5fgbxQJ/image.png';
+                    section.querySelector('.event-image').src = imgUrl;
+                    section.querySelector('h2').textContent = event.title || `Event ${i}`;
+                    section.querySelector('.event-participation').insertAdjacentHTML('beforebegin', `
+                        <div class="event-details">
+                            <p><strong>Date:</strong> ${formatDate(event.date)}</p>
+                            <p><strong>Time:</strong> ${event.time}</p>
+                            <p><strong>Location:</strong> ${event.location}</p>
+                            <p>${event.description}</p>
+                            ${isAdminLoggedIn ? `<button class=\"edit-image-btn\" data-id=\"${event.id}\">Bild bearbeiten</button>` : ''}
+                        </div>
+                    `);
+                }
             }
         }
-    }
 
-    // Events-Container für Übersicht (optional)
-    const eventsContainer = document.getElementById('events-container');
-    if (eventsContainer) {
-        eventsContainer.innerHTML = events.map(event => `
-            <div class="event-card">
-                <h3>${event.title}</h3>
-                <img src="${event.imageUrl && event.imageUrl.trim() !== '' ? event.imageUrl : 'https://i.postimg.cc/L5fgbxQJ/image.png'}" alt="Event Bild" class="event-image" style="max-width:100%;height:auto;" />
-                <p><strong>Date:</strong> ${formatDate(event.date)}</p>
-                <p><strong>Time:</strong> ${event.time}</p>
-                <p><strong>Location:</strong> ${event.location}</p>
-                <p>${event.description}</p>
-                ${isAdminLoggedIn ? `<button class=\"edit-image-btn\" data-id=\"${event.id}\">Bild bearbeiten</button>` : ''}
-            </div>
-        `).join('');
+        // Events-Container für Übersicht (optional)
+        const eventsContainer = document.getElementById('events-container');
+        if (eventsContainer) {
+            eventsContainer.innerHTML = events.map(event => `
+                <div class="event-card">
+                    <h3>${event.title}</h3>
+                    <img src="${event.imageUrl && event.imageUrl.trim() !== '' ? event.imageUrl : 'https://i.postimg.cc/L5fgbxQJ/image.png'}" alt="Event Bild" class="event-image" style="max-width:100%;height:auto;" />
+                    <p><strong>Date:</strong> ${formatDate(event.date)}</p>
+                    <p><strong>Time:</strong> ${event.time}</p>
+                    <p><strong>Location:</strong> ${event.location}</p>
+                    <p>${event.description}</p>
+                    ${isAdminLoggedIn ? `<button class=\"edit-image-btn\" data-id=\"${event.id}\">Bild bearbeiten</button>` : ''}
+                </div>
+            `).join('');
+        }
+    } catch (error) {
+        console.error('Error loading events:', error);
     }
 }
 

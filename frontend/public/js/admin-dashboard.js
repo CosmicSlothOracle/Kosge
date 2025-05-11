@@ -19,58 +19,18 @@ function debugLog(...args) {
 // Sleep function for retry delay
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Authentication handling
-function getAuthToken() {
-    return localStorage.getItem('authToken');
-}
-
-function checkAuth() {
-    const authToken = getAuthToken();
-    debugLog('Checking authentication...');
-
-    if (!authToken) {
-        debugLog('No auth token found');
-        redirectToLogin();
-        return false;
-    }
-
-    // Validate token format
-    try {
-        const tokenParts = authToken.split('.');
-        if (tokenParts.length !== 3) {
-            debugLog('Invalid token format');
-            redirectToLogin();
-            return false;
-        }
-    } catch (error) {
-        debugLog('Token validation error:', error);
-        redirectToLogin();
-        return false;
-    }
-
-    return true;
-}
-
-function redirectToLogin() {
-    sessionStorage.removeItem('adminAuthenticated');
-    localStorage.removeItem('authToken');
-    window.location.href = '../index.html';
-}
-
-// Load banners from API
+// Load banners from Google Apps Script
 async function loadBanners() {
     debugLog('Loading banners...');
     try {
-        const url = `${API_BASE_URL}/banners`;
-        debugLog('Fetching banners from:', url);
-
-        const response = await fetch(url, {
-            method: 'GET',
+        const response = await fetch(API_BASE_URL, {
+            method: 'POST',
             headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
-            mode: 'cors'
+            body: new URLSearchParams({
+                action: 'getBanners'
+            })
         });
 
         if (!response.ok) {
@@ -86,33 +46,19 @@ async function loadBanners() {
     }
 }
 
-// Update fetchParticipants with authentication
+// Fetch participants from Google Apps Script
 async function fetchParticipants(retryCount = 0) {
     debugLog(`Fetching participants... (attempt ${retryCount + 1}/${MAX_RETRIES})`);
-
-    if (!checkAuth()) {
-        throw new Error('Not authenticated');
-    }
-
     try {
-        const url = `${API_BASE_URL}/participants`;
-        debugLog('Fetching from URL:', url);
-
-        const response = await fetch(url, {
-            method: 'GET',
+        const response = await fetch(API_BASE_URL, {
+            method: 'POST',
             headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getAuthToken()}`
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
-            mode: 'cors'
+            body: new URLSearchParams({
+                action: 'getParticipants'
+            })
         });
-
-        if (response.status === 401) {
-            debugLog('Authentication expired');
-            redirectToLogin();
-            throw new Error('Authentication expired');
-        }
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -132,7 +78,7 @@ async function fetchParticipants(retryCount = 0) {
     } catch (error) {
         console.error('Error fetching participants:', error);
 
-        if (retryCount < MAX_RETRIES - 1 && error.message !== 'Authentication expired') {
+        if (retryCount < MAX_RETRIES - 1) {
             debugLog(`Retrying in ${RETRY_DELAY}ms...`);
             await sleep(RETRY_DELAY);
             return fetchParticipants(retryCount + 1);
@@ -222,7 +168,6 @@ async function initializeDashboard() {
 document.addEventListener('DOMContentLoaded', () => {
     debugLog('DOM Content Loaded');
     debugLog('Using API URL:', API_BASE_URL);
-    checkAuth();
     initializeDashboard();
 
     // Close modal when clicking the close button
