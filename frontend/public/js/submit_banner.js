@@ -1,5 +1,5 @@
 // Banner URL Submission Script
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby0VAWBbMPvqeDbFykJnkYWIsYyAApC3IfNiLj9AJUZv4m0T62uwUi0wucZFQFgZvQudg/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzcEcQzt4dMn1B1yVMiRf25fYeXy1kUfRFsZ5LZ1AXIqYHWIaJXaWQaacG6XIR3bQHohQ/exec';
 
 function submitBannerUrl() {
     const urlInput = document.getElementById("new-banner-url");
@@ -26,14 +26,34 @@ function submitBannerUrl() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);  // 10 second timeout
 
-    fetch(GOOGLE_SCRIPT_URL, {
-        method: "POST",
-        body: new URLSearchParams({
-            url: url,
-            userIP: '' // Optional: you could add client IP if needed
-        })
+    // Create form data for submission
+    const formData = new FormData();
+    formData.append('url', url);
+    formData.append('origin', 'geko-berlin.netlify.app');
+    formData.append('userIP', '');
+
+    fetch(GOOGLE_SCRIPT_URL + "?url=" + encodeURIComponent(url) + "&origin=geko-berlin.netlify.app", {
+        method: "GET",
+        headers: {
+            'Accept': 'application/json'
+        }
     })
-    .then(response => response.json())
+    .then(response => {
+        clearTimeout(timeoutId);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.text().then(text => {
+            try {
+                // Try to parse as JSON
+                return JSON.parse(text);
+            } catch (e) {
+                // If not valid JSON, return the text
+                console.warn('Response is not valid JSON:', text);
+                return { status: 'success', message: 'Banner URL submitted' };
+            }
+        });
+    })
     .then(data => {
         if (data.status === 'success') {
             status.textContent = "Erfolgreich übermittelt!";
@@ -41,7 +61,7 @@ function submitBannerUrl() {
             urlInput.value = "";
             addSubmittedBannerToRotation(url);
         } else {
-            throw new Error(data.message);
+            throw new Error(data.message || 'Unknown error');
         }
     })
     .catch(error => {
