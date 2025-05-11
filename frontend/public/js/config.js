@@ -1,7 +1,7 @@
 // API Configuration
 const config = {
-    // Use the correct backend URL
-    API_BASE_URL: 'https://kosge-backend.onrender.com',
+    // Use local backend URL
+    API_BASE_URL: 'http://localhost:10000',
     MAX_RETRIES: 3,
     RETRY_DELAY: 1000,
     DEBUG: true // Enable debug logging

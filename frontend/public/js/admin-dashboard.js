@@ -19,20 +19,49 @@ function debugLog(...args) {
 // Sleep function for retry delay
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Check authentication
+// Authentication handling
+function getAuthToken() {
+    return localStorage.getItem('authToken');
+}
+
 function checkAuth() {
-    const isAuthenticated = sessionStorage.getItem('adminAuthenticated');
-    debugLog('Authentication status:', isAuthenticated);
-    if (!isAuthenticated) {
-        window.location.href = '../index.html';
+    const authToken = getAuthToken();
+    debugLog('Checking authentication...');
+
+    if (!authToken) {
+        debugLog('No auth token found');
+        redirectToLogin();
+        return false;
     }
+
+    // Validate token format
+    try {
+        const tokenParts = authToken.split('.');
+        if (tokenParts.length !== 3) {
+            debugLog('Invalid token format');
+            redirectToLogin();
+            return false;
+        }
+    } catch (error) {
+        debugLog('Token validation error:', error);
+        redirectToLogin();
+        return false;
+    }
+
+    return true;
+}
+
+function redirectToLogin() {
+    sessionStorage.removeItem('adminAuthenticated');
+    localStorage.removeItem('authToken');
+    window.location.href = '../index.html';
 }
 
 // Load banners from API
 async function loadBanners() {
     debugLog('Loading banners...');
     try {
-        const url = `${API_BASE_URL}/api/banners`;
+        const url = `${API_BASE_URL}/banners`;
         debugLog('Fetching banners from:', url);
 
         const response = await fetch(url, {
@@ -57,48 +86,53 @@ async function loadBanners() {
     }
 }
 
-// Fetch participants from API with retry logic
+// Update fetchParticipants with authentication
 async function fetchParticipants(retryCount = 0) {
     debugLog(`Fetching participants... (attempt ${retryCount + 1}/${MAX_RETRIES})`);
+
+    if (!checkAuth()) {
+        throw new Error('Not authenticated');
+    }
+
     try {
-        const url = `${API_BASE_URL}/api/participants`;
+        const url = `${API_BASE_URL}/participants`;
         debugLog('Fetching from URL:', url);
 
         const response = await fetch(url, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getAuthToken()}`
             },
             mode: 'cors'
         });
 
-        debugLog('Response status:', response.status);
-        debugLog('Response headers:', Object.fromEntries(response.headers.entries()));
+        if (response.status === 401) {
+            debugLog('Authentication expired');
+            redirectToLogin();
+            throw new Error('Authentication expired');
+        }
 
-        // Check if response is ok
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        // Try to get the response text first
         const text = await response.text();
         debugLog('Raw response:', text);
 
-        // Try to parse as JSON
         try {
             const data = JSON.parse(text);
             debugLog('Parsed data:', data);
             return data.participants || [];
         } catch (parseError) {
             debugLog('JSON parse error:', parseError);
-            throw new Error(`JSON parse error: ${parseError.message}. Raw response: ${text}`);
+            throw new Error(`JSON parse error: ${parseError.message}`);
         }
     } catch (error) {
         console.error('Error fetching participants:', error);
 
-        // Retry logic
-        if (retryCount < MAX_RETRIES - 1) {
+        if (retryCount < MAX_RETRIES - 1 && error.message !== 'Authentication expired') {
             debugLog(`Retrying in ${RETRY_DELAY}ms...`);
             await sleep(RETRY_DELAY);
             return fetchParticipants(retryCount + 1);
@@ -108,7 +142,17 @@ async function fetchParticipants(retryCount = 0) {
     }
 }
 
-// Render participants
+// Safe HTML rendering
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// Update renderParticipants with safe HTML
 function renderParticipants(participants) {
     debugLog('Rendering participants:', participants);
 
@@ -128,12 +172,12 @@ function renderParticipants(participants) {
 
     participationList.innerHTML = participants.map(participant => `
         <div class="participation-entry">
-            <div class="participation-banner banner-tag-${participant.banner || '1'}">
-                Banner ${participant.banner || 'Kein Banner'}
+            <div class="participation-banner banner-tag-${escapeHtml(participant.banner || '1')}">
+                Banner ${escapeHtml(participant.banner || 'Kein Banner')}
             </div>
-            <h3>${participant.name}</h3>
-            ${participant.email ? `<p><strong>Email:</strong> ${participant.email}</p>` : ''}
-            ${participant.message ? `<p><strong>Nachricht:</strong> ${participant.message}</p>` : ''}
+            <h3>${escapeHtml(participant.name)}</h3>
+            ${participant.email ? `<p><strong>Email:</strong> ${escapeHtml(participant.email)}</p>` : ''}
+            ${participant.message ? `<p><strong>Nachricht:</strong> ${escapeHtml(participant.message)}</p>` : ''}
             <p><strong>Datum:</strong> ${new Date(participant.timestamp || Date.now()).toLocaleString('de-DE')}</p>
         </div>
     `).join('');

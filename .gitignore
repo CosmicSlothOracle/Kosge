@@ -46,3 +46,9 @@ backend/uploads/*
 # System Files
 .DS_Store
 Thumbs.db
+
+# Netlify build output (if used)
+dist/
+
+# Node modules (if any JS tooling is added)
+node_modules/

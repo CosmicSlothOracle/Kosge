@@ -6,6 +6,10 @@ import json
 from werkzeug.utils import secure_filename
 from cms import ContentManager
 import logging
+from config import (
+    UPLOAD_FOLDER, PARTICIPANTS_FILE, ADMIN_USER,
+    CORS_ORIGINS, MAX_CONTENT_LENGTH, init
+)
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -15,15 +19,7 @@ app = Flask(__name__)
 # Configure CORS more explicitly
 CORS(app, resources={
     r"/api/*": {
-        "origins": [
-            "http://localhost:8000",
-            "http://localhost:8080",
-            "https://kosge-frontend.onrender.com",
-            "https://kosge-frontend-kqxo.onrender.com",
-            "https://kos-frontend.onrender.com",
-            "https://kos-frontend-kqxo.onrender.com",
-            "https://kos-2.onrender.com"
-        ],
+        "origins": CORS_ORIGINS,
         "methods": ["GET", "POST", "DELETE", "OPTIONS", "PUT"],
         "allow_headers": ["Content-Type", "Authorization"],
         "expose_headers": ["Content-Type", "Authorization"],

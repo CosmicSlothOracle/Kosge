@@ -106,9 +106,12 @@ body {
 .content-wrapper {
     position: relative;
     background-color: rgba(255, 253, 249, 0.9);
+    /* Increased opacity for better readability */
     min-height: 100vh;
     padding: 0 1rem;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    /* Subtle shadow for depth */
+    padding-bottom: var(--mobile-nav-height);
 }
 
 /* -----------------------------------
@@ -184,8 +187,42 @@ nav {
     /* Hide desktop navigation */
 }
 
-.mobile-nav, .mobile-nav-item {
-    display: none !important;
+.mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--accent-color);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: var(--mobile-nav-height);
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+    transition: color 0.3s ease;
+}
+
+.mobile-nav-item i {
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+}
+
+.mobile-nav-item span {
+    font-size: 0.7rem;
+}
+
+.mobile-nav-item:hover {
+    color: var(--secondary-color);
 }
 
 /* -----------------------------------
@@ -217,6 +254,11 @@ h1,
 h2 {
     color: var(--primary-color);
     margin-bottom: 15px;
+}
+
+h1 {
+    font-size: 2rem;
+    margin: 1rem 0;
 }
 
 /* -----------------------------------
@@ -437,23 +479,27 @@ footer a {
 
 /* Mobile-First Responsive Design */
 @media screen and (min-width: 768px) {
+    .mobile-nav {
+        display: none;
+    }
+
     .main-nav {
         display: flex;
         justify-content: center;
-        list-style: none;
-        padding: 0;
-        margin: 0;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 15px 0;
     }
 
     .main-nav li {
-        margin: 0 1rem;
+        list-style: none;
+        margin: 0 15px;
     }
 
     .main-nav a {
-        color: var(--text-color);
         text-decoration: none;
-        padding: 0.5rem 1rem;
-        transition: all 0.3s ease;
+        color: var(--primary-color);
+        font-weight: bold;
+        transition: color 0.3s ease;
     }
 
     .main-nav a:hover {
@@ -461,7 +507,12 @@ footer a {
     }
 
     .content-wrapper {
-        padding: 1rem 2rem;
+        padding-bottom: 0;
+    }
+
+    main {
+        max-width: 800px;
+        margin: 0 auto;
     }
 }
 
@@ -503,49 +554,87 @@ section {
   Banner Section
 ----------------------------------- */
 .banner-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    margin-top: 20px;
+    display: none;
 }
 
 .banner {
-    position: relative;
+    display: none;
+}
+
+/* Event Sections Styling */
+#event1, #event2, #event3, #event4 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background-color: #f9f9f9;
     border-radius: 10px;
-    overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
 }
 
-.banner:hover {
-    transform: scale(1.02);
-}
-
-.banner img {
+.event-image-container {
+    position: relative;
     width: 100%;
-    height: 250px;
+    max-width: 600px;
+    margin-bottom: 1rem;
+}
+
+.event-image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
     object-fit: cover;
 }
 
-.edit-banner-btn {
+.edit-event-btn {
     position: absolute;
     bottom: 10px;
     right: 10px;
-    background-color: var(--primary-color);
+    background-color: rgba(0, 0, 0, 0.7);
     color: white;
     border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
+    padding: 8px 16px;
+    border-radius: 4px;
     cursor: pointer;
-    display: none;
-    /* Hidden by default */
-    visibility: hidden;
-    opacity: 0;
-    transition: all 0.3s ease;
+    transition: background-color 0.3s ease;
 }
 
-.edit-banner-btn:hover {
-    background-color: var(--secondary-color);
+.edit-event-btn:hover {
+    background-color: rgba(0, 0, 0, 0.9);
+}
+
+.event-participation {
+    width: 100%;
+    max-width: 600px;
+}
+
+.event-participation-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.event-participation-form input,
+.event-participation-form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.event-participation-form button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.event-participation-form button:hover {
+    background-color: #45a049;
 }
 
 /* -----------------------------------
@@ -554,38 +643,36 @@ section {
 .modal {
     display: none;
     position: fixed;
-    z-index: 1001;
-    left: 0;
     top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
 }
 
 .modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 500px;
-    border-radius: 5px;
     position: relative;
+    background-color: var(--background-color);
+    margin: 5% auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 24px;
     cursor: pointer;
+    color: var(--text-color);
 }
 
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
+.close:hover {
+    color: var(--accent-color);
 }
 
 /* Form Styles */
@@ -596,22 +683,29 @@ section {
 .form-group label {
     display: block;
     margin-bottom: 5px;
-    font-weight: bold;
+    color: var(--text-color);
+    font-weight: 500;
 }
 
-.form-group input {
+.form-group input,
+.form-group textarea {
     width: 100%;
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 16px;
+    font-size: 14px;
 }
 
-form button[type="submit"] {
-    width: 100%;
-    padding: 10px;
-    background-color: var(--secondary-color);
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Button Styles */
+.admin-save-btn {
+    background-color: var(--accent-color);
     color: white;
+    padding: 10px 20px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -619,8 +713,25 @@ form button[type="submit"] {
     transition: background-color 0.3s ease;
 }
 
-form button[type="submit"]:hover {
+.admin-save-btn:hover {
+    background-color: var(--secondary-color);
+}
+
+#logout-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
     background-color: var(--accent-color);
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 1000;
+}
+
+#logout-btn:hover {
+    background-color: var(--secondary-color);
 }
 
 /* Mobile Responsive Styles */
@@ -716,25 +827,10 @@ form button[type="submit"]:hover {
     font-style: italic;
 }
 
-/* Admin Login Button */
+/* Remove Admin Login Button */
 #admin-login-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 10px 20px;
-    background-color: var(--secondary-color);
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    z-index: 1000;
-    font-size: 16px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s ease;
-}
-
-#admin-login-button:hover {
-    background-color: var(--accent-color);
+    display: none !important;
+    visibility: hidden;
 }
 
 /* Privacy Policy Styles */
@@ -913,4 +1009,332 @@ section:hover .section-title-container h2 {
     .section-title-container h2 {
         font-size: 2rem;
     }
+}
+
+/* Admin Button */
+.admin-button {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-left: 1rem;
+    transition: background-color 0.2s;
+}
+
+.admin-button:hover {
+    background-color: #7d3c96;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+}
+
+/* Admin Login Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    position: relative;
+    background-color: white;
+    margin: 10% auto;
+    padding: 2rem;
+    width: 90%;
+    max-width: 400px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.close {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: var(--accent-color);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 2px rgba(230, 126, 34, 0.2);
+}
+
+.message {
+    margin-top: 1rem;
+    padding: 0.8rem;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.message.error {
+    background-color: #fee;
+    color: #e74c3c;
+}
+
+.message.success {
+    background-color: #efe;
+    color: #27ae60;
+}
+
+/* Responsive adjustments for admin controls */
+@media (max-width: 768px) {
+    .header-controls {
+        margin-top: 1rem;
+    }
+
+    .admin-button {
+        margin-left: 0.5rem;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+}
+
+#admin-login-modal .modal-content {
+    max-width: 400px;
+    margin: 15% auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+#admin-login-modal .form-group {
+    margin-bottom: 15px;
+}
+
+#admin-login-modal .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+#admin-login-modal .form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#admin-login-modal button[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#admin-login-modal button[type="submit"]:hover {
+    background-color: var(--accent-color);
+}
+
+#logout-btn {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#logout-btn:hover {
+    background-color: var(--accent-color);
+}
+
+/* Admin Modal Styles */
+.admin-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.admin-modal-content {
+    position: relative;
+    background-color: var(--background-color);
+    margin: 5% auto;
+    padding: 20px;
+    width: 80%;
+    max-width: 600px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.admin-modal-close {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-color);
+}
+
+.admin-form-group {
+    margin-bottom: 15px;
+}
+
+.admin-form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.admin-form-group input,
+.admin-form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.admin-form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.admin-save-btn {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.admin-save-btn:hover {
+    background-color: var(--secondary-color);
+    color: var(--light-text);
+}
+
+/* Event Section Styles */
+.event-section {
+    position: relative;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: var(--background-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.event-content {
+    margin-bottom: 40px;
+}
+
+/* Event Styles */
+.events-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.event-card {
+    background-color: var(--background-color);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.event-card h3 {
+    color: var(--accent-color);
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.event-card p {
+    margin-bottom: 8px;
+    color: var(--text-color);
+}
+
+.event-card strong {
+    color: var(--secondary-color);
+}
+
+.edit-event-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.edit-event-btn:hover {
+    background-color: var(--secondary-color);
+}
+
+/* Add Event Button */
+.add-event-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 16px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+.add-event-btn:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
