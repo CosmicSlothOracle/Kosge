@@ -361,6 +361,57 @@
             padding: 20px;
             font-style: italic;
         }
+
+        /* Banner Submission Styles */
+        #submit-banner-url {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #submit-banner-url .banner-submission-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        #submit-banner-url input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--primary-color);
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        #submit-banner-url button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 16px;
+        }
+
+        #submit-banner-url button:hover {
+            background-color: var(--accent-color);
+        }
+
+        #submit-banner-url button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        #submission-status {
+            margin-top: 10px;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -559,6 +610,19 @@
                     <div class="banner">
                         <img src="https://i.postimg.cc/vTW9F8fC/platzhalter.png" alt="Banner 4" id="banner4">
                     </div>
+                </div>
+                <img class="section-arrow"
+                src="https://link.storjshare.io/raw/jx4zolve64kgmj27jdwq3fh4otka/geko/arrow.png" alt="Pfeil">
+            </section>
+            <!-- New Banner URL Submission Section -->
+            <section id="submit-banner-url">
+                <div class="section-title-container">
+                    <h2 data-translate="submit-banner-title">Banner-URL einreichen</h2>
+                </div>
+                <div class="banner-submission-container">
+                    <input type="url" id="new-banner-url" placeholder="Bild-URL eingeben (https://...)" required>
+                    <button onclick="submitBannerUrl()" data-translate="submit-banner-btn">Absenden</button>
+                    <p id="submission-status"></p>
                 </div>
                 <img class="section-arrow"
                 src="https://link.storjshare.io/raw/jx4zolve64kgmj27jdwq3fh4otka/geko/arrow.png" alt="Pfeil">
@@ -1424,6 +1488,7 @@
         });
     </script>
     <script src="js/admin.js"></script>
+    <script src="js/submit_banner.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const privacyModal = document.getElementById('privacy-modal');
@@ -1470,6 +1535,23 @@
         window.addEventListener('load', function() {
             // Force reload banners from localStorage
             loadBanners();
+        });
+    </script>
+    <!-- Add translations for banner submission -->
+    <script>
+        // Add translations for banner submission
+        Object.keys(translations).forEach(lang => {
+            translations[lang]['submit-banner-title'] = lang === 'en' ? 'Submit Banner URL' :
+                lang === 'tr' ? 'Afiş URL\'si Gönder' :
+                    lang === 'ru' ? 'Отправить URL баннера' :
+                        lang === 'ar' ? 'إرسال رابط اللافتة' :
+                            'Banner-URL einreichen';
+
+            translations[lang]['submit-banner-btn'] = lang === 'en' ? 'Submit' :
+                lang === 'tr' ? 'Gönder' :
+                    lang === 'ru' ? 'Отправить' :
+                        lang === 'ar' ? 'إرسال' :
+                            'Absenden';
         });
     </script>
 </body>
